@@ -9,7 +9,7 @@
     <form class="mx-auto max-w-[550px] pt-2" novalidate @submit.prevent="onSubmit">
       <div
         v-if="props.content.input?.displayNameInput"
-        class="grid grid-cols-1 @sm:grid-cols-2"
+        class="grid grid-cols-1"
         data-testid="newsletter-display-name"
       >
         <div class="@sm:mr-[1rem]">
@@ -31,24 +31,7 @@
           </div>
         </div>
 
-        <div class="@sm:ml-[1rem]">
-          <label for="newsletter-last-name">
-            <UiFormLabel class="text-start">{{ t('newsletter.lastName') }}</UiFormLabel>
-            <SfInput
-              v-bind="lastNameAttributes"
-              id="newsletter-last-name"
-              v-model="lastName"
-              :invalid="Boolean(errors['lastName'])"
-              :placeholder="lastNameLabel.getPlaceholder('**').value"
-              :wrapper-class="wrapperClass"
-              type="text"
-              name="lastName"
-            />
-          </label>
-          <div class="h-[2rem]">
-            <ErrorMessage as="div" name="lastName" class="text-negative-700 text-left text-sm pt-[0.2rem]" />
-          </div>
-        </div>
+        
       </div>
 
       <div class="grid grid-cols-1">
@@ -155,9 +138,8 @@ const validationSchema = toTypedSchema(
     firstName: props.content.input?.nameIsRequired
       ? string().required(t('error.newsletter.firstNameRequired')).default('')
       : string().optional().default(''),
-    lastName: props.content.input?.nameIsRequired
-      ? string().required(t('error.newsletter.lastNameRequired')).default('')
-      : string().optional().default(''),
+    lastName: string().default(''),
+    
     email: string().email(t('error.email.valid')).required(t('error.email.required')).default(''),
     privacyPolicy: boolean().oneOf([true], t('error.newsletter.termsRequired')).default(false),
     turnstile:
@@ -172,15 +154,11 @@ const { errors, meta, defineField, handleSubmit, resetForm } = useForm({
 });
 
 const [firstName, firstNameAttributes] = defineField('firstName');
-const [lastName, lastNameAttributes] = defineField('lastName');
 const [email, emailAttributes] = defineField('email');
 const [turnstile, turnstileAttributes] = defineField('turnstile');
 const [privacyPolicy, privacyPolicyAttributes] = defineField('privacyPolicy');
 
-const lastNameLabel = useFormLabel(
-  t('newsletter.lastName'),
-  computed(() => !props.content.input?.nameIsRequired),
-);
+
 const firstNameLabel = useFormLabel(
   t('newsletter.firstName'),
   computed(() => !props.content.input?.nameIsRequired),
@@ -193,7 +171,7 @@ const subscribeNewsletter = async () => {
 
   const response = await subscribe({
     firstName: firstName.value,
-    lastName: lastName.value,
+    lastName: '',
     email: email.value || '',
     emailFolder: props.content.settings?.emailFolderId ?? 1,
     'cf-turnstile-response': turnstile.value,
@@ -214,7 +192,7 @@ const subscribeNewsletter = async () => {
 const onSubmit = handleSubmit(() => subscribeNewsletter());
 
 if (turnstileSiteKey.length > 0) {
-  const turnstileWatcher = watch([firstName, lastName, email], (data) => {
+  const turnstileWatcher = watch([firstName, email], (data) => {
     if (data.some((field) => field && field.length > 0)) {
       turnstileLoad.value = true;
       turnstileWatcher();
