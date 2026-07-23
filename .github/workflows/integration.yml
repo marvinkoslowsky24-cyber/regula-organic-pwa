@@ -23,13 +23,13 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Setup Node
         uses: ./.github/actions/setup
       - name: Build with VitePress
         run: |
           npm run docs:build
-          touch ${{ github.workspace }}/docs/.vitepress/dist/.nojekyll
+
       - name: Install & Run htmltest
         env:
           HTMLTEST_VERSION: '0.17.0'
@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-slim
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Dependency review
         uses: actions/dependency-review-action@v5
         with:
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup Node
         uses: ./.github/actions/setup
 
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup Node
         uses: ./.github/actions/setup
 
@@ -103,7 +103,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup Node
         uses: ./.github/actions/setup
 
@@ -136,7 +136,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup Node
         uses: ./.github/actions/setup
 
@@ -168,7 +168,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup Node
         uses: ./.github/actions/setup
 
