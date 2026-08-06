@@ -4,7 +4,14 @@ import type { Product } from '@plentymarkets/shop-api';
 import TextContent from '../TextContent.vue';
 
 const { useRouterMock, isInternalLinkMock, useProductsMock, tMock } = vi.hoisted(() => ({
-  useRouterMock: vi.fn(),
+  useRouterMock: vi.fn(() => ({
+    push: vi.fn(),
+    resolve: vi.fn(),
+    options: {},
+    afterEach: vi.fn(),
+    beforeEach: vi.fn(),
+    beforeResolve: vi.fn(),
+  })),
   isInternalLinkMock: vi.fn(),
   useProductsMock: vi.fn(),
   tMock: vi.fn(),
@@ -13,6 +20,20 @@ const { useRouterMock, isInternalLinkMock, useProductsMock, tMock } = vi.hoisted
 mockNuxtImport('useRouter', () => useRouterMock);
 mockNuxtImport('useLocalePath', () => () => (path: string) => `/de${path}`);
 mockNuxtImport('isInternalLink', () => isInternalLinkMock);
+mockNuxtImport(
+  'localizeHtmlLinks',
+  () =>
+    (html: string, _router: unknown, localePath: (p: string) => string, resolveTrailingSlash: (p: string) => string) =>
+      html.replace(
+        /<a\b([^>]*?)href=(["'])([^"']*?)\2/gi,
+        (match: string, before: string, quote: string, href: string) => {
+          if (isInternalLinkMock(href)) {
+            return `<a${before}href=${quote}${resolveTrailingSlash(localePath(href))}${quote}`;
+          }
+          return match;
+        },
+      ),
+);
 mockNuxtImport('useProducts', () => useProductsMock);
 mockNuxtImport('t', () => tMock);
 
@@ -44,7 +65,14 @@ const mountComponent = (htmlDescription: string) =>
 describe('TextContent - renderedHtmlDescription', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useRouterMock.mockReturnValue({ push: mockPush, resolve: vi.fn() });
+    useRouterMock.mockReturnValue({
+      push: mockPush,
+      resolve: vi.fn(),
+      options: {},
+      afterEach: vi.fn(),
+      beforeEach: vi.fn(),
+      beforeResolve: vi.fn(),
+    });
     isInternalLinkMock.mockImplementation((href: string) => href.startsWith('/'));
     useProductsMock.mockReturnValue({ currentProduct: ref(mockProduct) });
     tMock.mockImplementation((key: string) => ({ 'checkout.title': 'Checkout' })[key] ?? key);
@@ -138,7 +166,14 @@ describe('TextContent - renderedHtmlDescription', () => {
 describe('TextContent - handleRteClick', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useRouterMock.mockReturnValue({ push: mockPush, resolve: vi.fn() });
+    useRouterMock.mockReturnValue({
+      push: mockPush,
+      resolve: vi.fn(),
+      options: {},
+      afterEach: vi.fn(),
+      beforeEach: vi.fn(),
+      beforeResolve: vi.fn(),
+    });
   });
 
   it('should navigate via router.push for internal links', async () => {

@@ -107,7 +107,7 @@ const { getSetting: getMetaDescription } = useSiteSettings('metaDescription');
 const { getSetting: getMetaKeywords } = useSiteSettings('metaKeywords');
 const { getSetting: getRobots } = useSiteSettings('robots');
 const { getSetting: getPrimaryColor } = useSiteSettings('primaryColor');
-const { getSetting: customAssetsSafeMode } = useSiteSettings('customAssetsSafeMode');
+const { getBooleanSetting: customAssetsSafeMode } = useSiteSettings('customAssetsSafeMode');
 
 const { data: productsCatalog } = useProducts();
 
@@ -202,7 +202,6 @@ useSeoMeta({
   ogImage: () => ogImage.value,
   ogDescription: () => ogDescription.value,
   description: () => description.value,
-  keywords: () => keywords.value,
   robots: () => robots.value,
   themeColor: () => themeColor.value,
   generator: 'plentymarkets',
@@ -220,19 +219,21 @@ useHead({
     { rel: 'apple-touch-icon', href: fav.value },
     ...cssExternalAssets.value.map((asset, index) => ({
       key: `external-css-${asset.uuid ?? index}`,
-      rel: 'stylesheet',
+      rel: 'stylesheet' as const,
       media: asset.isActive ? 'all' : 'not all',
       href: asset.content,
     })),
   ],
-  meta: () =>
-    metaAssets.value
+  meta: () => [
+    { name: 'keywords', content: keywords.value },
+    ...metaAssets.value
       .filter((asset) => asset.name && asset.content)
       .map((asset) => ({
         key: `custom-meta-${asset.uuid}`,
         name: asset.name,
         content: asset.content,
       })),
+  ],
   style: () =>
     cssAssets.value.map((asset) => ({
       key: `custom-css-${asset.uuid}-o${asset.order ?? 0}`,

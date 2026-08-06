@@ -87,7 +87,7 @@ export const useUrlPageMeta: UseUrlPageMetaReturn = () => {
 
     const alternateLocales = getAvailableLocales().map((locale: Locale) => {
       return {
-        rel: 'alternate',
+        rel: 'alternate' as const,
         hreflang: locale,
         href: applyTrailingSlashToUrl(`${runtimeConfig.public.domain}${localePath(route.fullPath, locale)}`),
       };
@@ -188,11 +188,12 @@ export const useUrlPageMeta: UseUrlPageMetaReturn = () => {
    */
   const getCategoryRobotsContent: GetCategoryRobotsContent = (productsCatalog) => {
     const route = useRoute();
-    const { getSetting: getSeoCategoryRobotsNoIndex } = useSiteSettings('seoCategoryRobotsNoIndex');
+    const { getNumberSetting: getSeoCategoryRobotsNoIndex } = useSiteSettings('seoCategoryRobotsNoIndex');
     const currentPage = computed(() => Number(route.query.page as string) || 1);
-    const maxIndexedPage = computed(() =>
-      Number(getSeoCategoryRobotsNoIndex()) > 0 ? Number(getSeoCategoryRobotsNoIndex()) : 1,
-    );
+    const maxIndexedPage = computed(() => {
+      const value = getSeoCategoryRobotsNoIndex(1);
+      return value > 0 ? value : 1;
+    });
 
     return computed((): string => {
       if (!productsCatalog.value?.category) {
