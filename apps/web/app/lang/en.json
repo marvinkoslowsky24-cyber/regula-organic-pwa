@@ -336,6 +336,13 @@
     },
     "googlePay": {
       "paymentInProgress": "Payment in progress..."
+    },
+    "guaranteeNotice": "Your legal guarantee rights"
+  },
+  "guaranteeLabels": {
+    "area": {
+      "close": "Close guarantee details",
+      "open": "Open guarantee details"
     }
   },
   "customAssets": {

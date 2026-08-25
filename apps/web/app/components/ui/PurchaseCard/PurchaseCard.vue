@@ -123,6 +123,9 @@
             <template v-if="key === 'graduatedPrices' && configuration?.fields.graduatedPrices">
               <GraduatedPriceList :count="quantitySelectorValue" :product="product" />
             </template>
+            <template v-if="key === 'guaranteeLabel' && configuration?.fields.guaranteeLabel">
+              <GuaranteeBlock :product="product" max-width="20rem" class="m-4" />
+            </template>
 
             <template v-if="key === 'quantityAndAddToCart' && configuration?.fields.quantityAndAddToCart">
               <UnitContentSelect
@@ -177,7 +180,7 @@
                   <i18n-t keypath="shipping.excludedLabel" scope="global">
                     <template #shipping>
                       <UiLink
-                        :href="localePath(paths.shipping)"
+                        :href="resolvePathTrailingSlash(localePath(paths.shipping))"
                         class="focus:outline focus:outline-offset-2 focus:outline-2 outline-secondary-600 rounded"
                         target="_blank"
                       >
@@ -230,8 +233,6 @@ import { productGetters, reviewGetters, productBundleGetters } from '@plentymark
 import { SfCounter, SfRating, SfIconShoppingCart, SfLoaderCircular, SfTooltip } from '@storefront-ui/vue';
 import type { PriceCardPadding, PriceCardTextBlockItem, PurchaseCardProps } from '~/components/ui/PurchaseCard/types';
 import type { PayPalAddToCartCallback } from '#paypal/types';
-import { paths } from '~/utils/paths';
-
 const isTextBlock = (item: unknown): item is PriceCardTextBlockItem =>
   typeof item === 'object' && item !== null && (item as PriceCardTextBlockItem).type === 'textBlock';
 
@@ -253,6 +254,7 @@ const props = withDefaults(defineProps<PurchaseCardProps>(), {
       graduatedPrices: true,
       addToWishlist: true,
       quantityAndAddToCart: true,
+      guaranteeLabel: true,
       itemText: false,
       technicalData: false,
     },
@@ -269,6 +271,7 @@ const props = withDefaults(defineProps<PurchaseCardProps>(), {
       'itemBundle',
       'graduatedPrices',
       'addToWishlist',
+      'guaranteeLabel',
       'quantityAndAddToCart',
       'itemText',
       'technicalData',

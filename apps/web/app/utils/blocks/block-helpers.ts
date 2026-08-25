@@ -1,7 +1,4 @@
 import type { Block, GetBlocksResponse } from '@plentymarkets/shop-api';
-import { migrateLegacyFooterToContainer } from '~/utils/blockTemplates/footer';
-import { HEADER_BLOCK_NAME, NAVIGATION_BLOCK_NAME, UTILITY_BAR_BLOCK_NAME } from '~/utils/blocks/block-names';
-
 export const isHeaderBlock = (block: Block | null | undefined): boolean => block?.name === HEADER_BLOCK_NAME;
 
 export const isValidHeaderOrder = (blocks: Block[]): boolean => {
@@ -86,8 +83,7 @@ export const removeBlockFromColumn = (parent: Block, targetUuid: string): boolea
   content.splice(idx, 1);
 
   const cfg = parent.configuration as
-    | { columnWidths?: number[]; columnWidthsTablet?: number[]; columnWidthsMobile?: number[] }
-    | undefined;
+    { columnWidths?: number[]; columnWidthsTablet?: number[]; columnWidthsMobile?: number[] } | undefined;
 
   if (cfg && Array.isArray(cfg.columnWidths)) {
     const slot = removed.parent_slot ?? 0;

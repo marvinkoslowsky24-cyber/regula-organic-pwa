@@ -336,6 +336,13 @@
     },
     "googlePay": {
       "paymentInProgress": "Zahlung in Bearbeitung..."
+    },
+    "guaranteeNotice": "Ihre gesetzlichen Garantieansprüche"
+  },
+  "guaranteeLabels": {
+    "area": {
+      "close": "Garantie Details schließen",
+      "open": "Garantie Details öffnen"
     }
   },
   "customAssets": {
