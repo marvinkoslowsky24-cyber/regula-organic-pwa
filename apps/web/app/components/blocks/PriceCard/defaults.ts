@@ -7,7 +7,6 @@ const blocksList = {
     variations: [
       {
         title: 'Price Card',
-        image: 'https://cdn02.plentymarkets.com/v5vzmmmcb10k/frontend/PWA/Blocks/item_card.svg',
         template: {
           en: {
             name: 'PriceCard',
@@ -19,6 +18,7 @@ const blocksList = {
             content: {
               fields: {
                 itemName: true,
+                variationNumber: false,
                 price: true,
                 tags: true,
                 availability: true,
@@ -37,6 +37,7 @@ const blocksList = {
               },
               fieldsOrder: [
                 'itemName',
+                'variationNumber',
                 'price',
                 'tags',
                 'availability',
@@ -77,6 +78,7 @@ const blocksList = {
             content: {
               fields: {
                 itemName: true,
+                variationNumber: false,
                 price: true,
                 tags: true,
                 availability: true,
@@ -95,6 +97,7 @@ const blocksList = {
               },
               fieldsOrder: [
                 'itemName',
+                'variationNumber',
                 'price',
                 'tags',
                 'availability',
