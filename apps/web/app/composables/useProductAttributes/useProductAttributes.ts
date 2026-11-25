@@ -49,6 +49,30 @@ export const useProductAttributes = (): UseProductAttributesReturn => {
   };
 
   /**
+   * Keep the unit filter when identical attribute combinations have multiple
+   * content units. Otherwise the attributes themselves identify the content.
+   */
+  const hasIndependentUnitSelection = computed(() => {
+    const unitsByAttributes = new Map<string, Set<number>>();
+
+    for (const combination of state.value.combinations) {
+      const unitId = combination.unitCombinationId;
+      if (!unitId) continue;
+
+      const key = (combination.attributes ?? [])
+        .map((attribute) => `${attribute.attributeId}:${attribute.attributeValueId}`)
+        .sort()
+        .join('|');
+      const units = unitsByAttributes.get(key) ?? new Set<number>();
+      units.add(unitId);
+      if (units.size > 1) return true;
+      unitsByAttributes.set(key, units);
+    }
+
+    return false;
+  });
+
+  /**
    * @description Function for getting a valid combination from selected attributes.
    * @returns VariationMapProductVariation | null
    * @example
@@ -59,7 +83,7 @@ export const useProductAttributes = (): UseProductAttributesReturn => {
   const getCombination: GetCombination = (): VariationMapProductVariation | null => {
     return (
       state.value.combinations.find((combination) => {
-        if (state.value.unitCombinationId) {
+        if (state.value.unitCombinationId && hasIndependentUnitSelection.value) {
           if (combination.unitCombinationId !== state.value.unitCombinationId) {
             return false;
           }
@@ -81,7 +105,7 @@ export const useProductAttributes = (): UseProductAttributesReturn => {
     combination: VariationMapProductVariation,
     attributeValues: Record<number, number>,
   ): boolean => {
-    if (state.value.unitCombinationId) {
+    if (state.value.unitCombinationId && hasIndependentUnitSelection.value) {
       if (combination.unitCombinationId !== state.value.unitCombinationId) {
         return false;
       }
