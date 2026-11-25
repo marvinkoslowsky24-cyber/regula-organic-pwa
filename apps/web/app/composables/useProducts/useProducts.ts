@@ -39,9 +39,86 @@ export const useProducts: UseProductsReturn = (category = '') => {
 
     const identifier = category || params.categoryUrlPath || params.categoryId;
 
-    const { data } = await useAsyncData(`useProducts-${identifier}-${JSON.stringify(params)}`, () =>
-      useSdk().plentysystems.getFacet(params),
-    );
+    const sdk = useSdk().plentysystems;
+    const { data } = await useAsyncData(`useProducts-${identifier}-${JSON.stringify(params)}`, async () => {
+      const response = await sdk.getFacet(params);
+      const facet = response.data;
+
+      // Regula Organic pilot: only expand Vanilla in the unfiltered Protein
+      // Shakes category when the entire result fits on one page.
+      if (
+        !facet ||
+        Number(facet.category?.id) !== 1523 ||
+        (params.type && params.type !== 'category') ||
+        (params.page ?? 1) !== 1 ||
+        params.facets ||
+        params.priceMin ||
+        params.priceMax ||
+        (params as FacetSearchCriteria & { term?: string }).term ||
+        !Array.isArray(facet.products) ||
+        Number(facet.pagination?.totals) !== facet.products.length
+      ) {
+        return response;
+      }
+
+      const pageSize = params.itemsPerPage || defaults.DEFAULT_ITEMS_PER_PAGE;
+      const vanilla = facet.products.filter((product) => Number(product.item?.id) === 1141559383);
+      if (vanilla.length !== 1 || facet.products.length >= pageSize) return response;
+
+      const current = vanilla[0];
+      if (!current || current.attributes?.length) return response;
+
+      try {
+        const { data: detail } = await sdk.getProduct({
+          id: current.item.id,
+          variationId: current.variation.id,
+        });
+        const map = detail?.variationAttributeMap;
+        if (!map || map.attributes?.length) return response;
+
+        const existingIds = new Set(facet.products.map((product) => Number(product.variation.id)));
+        const missing = map.variations.filter(
+          (variation) =>
+            variation.isSalable === true &&
+            !variation.attributes?.length &&
+            !existingIds.has(Number(variation.variationId)),
+        );
+        if (missing.length !== 1) return response;
+
+        const target = missing[0];
+        if (!target) return response;
+        const { data: extra } = await sdk.getProduct({
+          id: current.item.id,
+          variationId: Number(target.variationId),
+        });
+
+        if (
+          !extra ||
+          Number(extra.item?.id) !== Number(current.item.id) ||
+          Number(extra.variation?.id) !== Number(target.variationId) ||
+          existingIds.has(Number(extra.variation.id)) ||
+          !extra.prices ||
+          extra.attributes?.length
+        ) {
+          return response;
+        }
+
+        const products = [...facet.products];
+        products.splice(products.indexOf(current) + 1, 0, extra);
+
+        return {
+          ...response,
+          data: {
+            ...facet,
+            products,
+            pagination: { ...facet.pagination, totals: products.length },
+          },
+        };
+      } catch {
+        // An optional enrichment must never break the original category.
+        return response;
+      }
+    });
 
     state.value.productsPerPage = params.itemsPerPage || defaults.DEFAULT_ITEMS_PER_PAGE;
 
